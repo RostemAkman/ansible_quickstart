@@ -1,0 +1,22 @@
+---
+- name: Create an administrator user
+  hosts: all
+  become: yes
+  vars:
+    db_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37306164393134616230336262353434363237346330343563643730333234313661386634393265
+          3033313063303137356665653066343433313339353432300a326436646131663065396139613639
+          38643839363464653734636631336165646532383036376534396539326137336464353032656262
+          3064383062353461300a333664313338343565663630313330396664343736366261396334383038
+          3362
+  tasks:
+    - name: hashhhh
+      ansible.builtin.shell: echo "{{ db_password }}" | openssl passwd -6 -stdin
+      register: hashed_password
+
+    - name: Create 'byansible'
+      user:
+        name: byansible
+        state: present
+        password: "{{ hashed_password.stdout }}"

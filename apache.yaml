@@ -1,0 +1,47 @@
+---
+- name: Install and configure Apache
+  hosts: all
+  become: yes
+  vars:
+    space_text:
+      - "R"
+      - "O"
+      - "S"
+      - "T"
+      - "E"
+      - "M" 
+  tasks:
+
+    - name: Ensure Apache is installed
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure Apache is installed
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Start and enable Apache service
+      ansible.builtin.service:
+        name: "{{ 'httpd' if ansible_os_family == 'RedHat' else 'apache2' }}"
+        state: started
+        enabled: yes
+
+    - name: Deploy a custom index.html
+      ansible.builtin.template:
+        src: template/index.html.j2
+        dest: /var/www/html/index.html
+        mode: '0644'
+    - name: css
+      ansible.builtin.copy:
+        src: files/canvas3d.css
+        dest: /var/www/html/canvas3d.css
+        mode: '0644'
+    - name: js
+      ansible.builtin.copy:
+        src: files/canvas.js
+        dest: /var/www/html/canvas.js
+        mode: '0644'
